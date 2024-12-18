@@ -7,6 +7,8 @@ requires-python = ">=3.10"
 dependencies = [
     "litellm>=1.55.3",
     "openai>=1.58.1",
+    "pydantic>=2.10.3",
+    "python-dotenv>=1.0.1",
     "wandb>=0.19.1",
     "weave>=0.51.25",
 ]
