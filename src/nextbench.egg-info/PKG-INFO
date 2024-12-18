@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: nextbench
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: litellm>=1.55.3
+Requires-Dist: openai>=1.58.1
+Requires-Dist: wandb>=0.19.1
+Requires-Dist: weave>=0.51.25
+
+# NextBench
+NextBench is a collection of wide variety of benchmarks for accessing the performance of LLMs and VLMs and more.
