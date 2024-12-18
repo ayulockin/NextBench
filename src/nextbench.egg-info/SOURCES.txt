@@ -1,9 +1,0 @@
-LICENSE
-README.md
-pyproject.toml
-src/nextbench/__init__.py
-src/nextbench.egg-info/PKG-INFO
-src/nextbench.egg-info/SOURCES.txt
-src/nextbench.egg-info/dependency_links.txt
-src/nextbench.egg-info/requires.txt
-src/nextbench.egg-info/top_level.txt
