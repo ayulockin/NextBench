@@ -12,3 +12,9 @@ dependencies = [
     "wandb>=0.19.1",
     "weave>=0.51.25",
 ]
+
+[dependency-groups]
+dev = [
+    "datasets>=3.2.0",
+    "ipykernel>=6.29.5",
+]

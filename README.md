@@ -10,3 +10,14 @@ NextBench is a collection of wide variety of benchmarks for accessing the perfor
 - [ ] Flexible configuration to run benchmarks
 - [ ] Support for running benchmarks in parallel
 - [ ] Support for customizing the evaluation logic via prompting
+
+## Supported Benchmarks
+
+### Code
+
+- [ ] [LiveCodeBench](https://livecodebench.github.io)
+- [ ] 
+
+### Math
+
+- [ ] [Math-500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500)
