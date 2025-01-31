@@ -1,23 +1,8 @@
 # NextBench
 NextBench is a collection of wide variety of benchmarks for accessing the performance of LLMs and VLMs and more.
 
-## Features
+This project aims to make it easy to run IMPORTANT benchmarks across multiple clients/sdks/providers. This is powered by [W&B Weave](https://weave-docs.wandb.ai).
 
-- [ ] Support for multiple clients/sdks/providers
-- [ ] Support for multiple benchmarks off the shelf
-- [ ] Support for custom benchmarks
-- [ ] Support for multiple metrics
-- [ ] Flexible configuration to run benchmarks
-- [ ] Support for running benchmarks in parallel
-- [ ] Support for customizing the evaluation logic via prompting
+If you would like to see a benchmark/client/sdk/provider added, please open an issue.
 
-## Supported Benchmarks
-
-### Code
-
-- [ ] [LiveCodeBench](https://livecodebench.github.io)
-- [ ] 
-
-### Math
-
-- [ ] [Math-500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500)
+This is a work in progress but we will soon be opening it up for public contributions.
