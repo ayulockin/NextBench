@@ -1,6 +1,8 @@
 *.egg-info
 *.ipynb-checkpoints
+.env
+.cache
+
 __pycache__
 nextbench.egg-info
-.env
 notebooks/
