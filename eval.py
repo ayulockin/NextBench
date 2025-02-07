@@ -15,11 +15,12 @@ weave_client = weave.init('nextbench-dev')
 
 
 # Metrics
-@weave.op()
-def exact_match(answer: str, output: RequestResult) -> bool:
-    parsed_prediction = parse_math_answer(output.completions[0])
-    return answer == parsed_prediction
 
+class ExactMatch(weave.Scorer):
+    @weave.op()
+    def score(self, answer: str, output: RequestResult) -> bool:
+        parsed_prediction = parse_math_answer(output.completions[0])
+        return answer == parsed_prediction
 
 # Setup evaluation scenarios
 evaluation_scenarios = []
@@ -28,7 +29,7 @@ for scenario, ref in DATASETS.items():
     datset = get_dataset(ref)
     evaluation = weave.Evaluation(
         dataset=datset.rows[:10],
-        scorers=[exact_match],
+        scorers=[ExactMatch()],
         preprocess_model_input=preprocess_example,
     )
     evaluation_scenarios.append(evaluation)
