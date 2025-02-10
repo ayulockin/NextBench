@@ -16,11 +16,11 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
         return weave.ref(ref).get().rows
 
     @abc.abstractmethod
-    def preprocess_input(self, row: dict) -> str:
-        """
-        Optional override: transforms a single dataset row into
-        the exact prompt or input your model should see. 
-        Default is just returning the "question" field.
+    def preprocess_input(self, row: dict) -> dict:
+        """Implement this method to preprocess the input row provided to the client.
+        Ideally you should not add the system prompt to the input here. Use this abstract method to add any pre-processing logic.
+
+        Make sure to return a dictionary with a single key "prompt" that maps to the preprocessed input string.
         """
         raise NotImplementedError
 
@@ -32,13 +32,6 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
         Default is to return the raw completion text.
         """
         raise NotImplementedError
-    
-    @abc.abstractmethod
-    def compute_metrics(self, answer: str, output: RequestResult) -> dict:
-        """
-        Computes the metrics for the given answer and output.
-        """
-        raise NotImplementedError
 
     def score(self, answer: str, output: RequestResult) -> bool:
         """
@@ -48,6 +41,7 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
         """
         prediction = self.postprocess_output(output)
         return self.metric.score(answer, prediction)
+
 
 if __name__ == '__main__':
     # These tests assume that the BaseScenario class (defined in this file)
@@ -75,11 +69,6 @@ if __name__ == '__main__':
         def postprocess_output(self, output: RequestResult) -> str:
             # For testing, return the first (and assumed only) completion.
             return output.completions[0] if output.completions else ""
-
-        def compute_metrics(self, answer: str, output: RequestResult) -> dict:
-            # Compute a simple metric based on score equality.
-            score_val = self.metric.score(answer, self.postprocess_output(output))
-            return {"score": score_val}
 
     # Create dummy RequestResult instances to simulate LLM output.
     correct_result = RequestResult(

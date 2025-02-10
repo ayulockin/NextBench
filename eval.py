@@ -13,7 +13,6 @@ from nextbench.utils import parse_math_answer, preprocess_example
 # Initialize the weave client
 weave_client = weave.init('nextbench-dev')
 
-
 # Metrics
 class ExactMatch(weave.Scorer):
     @weave.op()

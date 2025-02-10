@@ -1,8 +1,5 @@
 import weave
-
-
-def get_dataset(ref: str) -> weave.Dataset:
-    return weave.ref(ref).get()
+from .base_scenario import BaseScenario
 
 DATASETS = {
     "MATH500": "weave:///ayut/NextBench/object/MATH500:YMovIwbHIlH2hxe70wriWldlxHwEfXnkfuDX4nvdbzw",
@@ -12,6 +9,6 @@ DATASETS = {
 }
 
 __all__ = [
-    "get_dataset",
+    "BaseScenario",
     "DATASETS",
 ]
