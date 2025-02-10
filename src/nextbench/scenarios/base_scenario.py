@@ -98,6 +98,8 @@ if __name__ == '__main__':
     # Instantiate our dummy scenario.
     scenario = DummyScenario()
 
+    weave_client = weave.init("nextbench-dev")
+
     # Test Case 1: When the model output matches the answer.
     answer = "42"
     result_score = scenario.score(answer, correct_result)
