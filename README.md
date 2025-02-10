@@ -19,8 +19,16 @@ Each benchmark must have a `question` and `answer` column. If the original bench
 - [MATH500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500)
 - [LiveCodeBench](https://huggingface.co/datasets/livecodebench/code_generation_lite)
 
+## Run Evaluation
 
-## Citations
+```bash
+python eval.py
+```
+
+The following will load the MATH500 dataset and run the evaluation using the exact match metric.
+
+<details>
+<summary>Citations</summary>
 
 ```bibtex
 @misc{wang2024mmluprorobustchallengingmultitask,

@@ -2,7 +2,6 @@ import weave
 import re
 
 from nextbench.scenarios import BaseScenario
-from nextbench.scenarios import DATASETS
 from nextbench.utils import RequestResult
 
 
@@ -12,7 +11,7 @@ def parse_math_answer(completion: str) -> str:
 
 
 class Math500Scenario(BaseScenario):
-    dataset_ref: str = DATASETS["MATH500"]
+    dataset_ref: str = "weave:///ayut/NextBench/object/MATH500:YMovIwbHIlH2hxe70wriWldlxHwEfXnkfuDX4nvdbzw"
     system_prompt: str = "Answer the question and return the answer in the \\boxed{} format."
 
     def preprocess_input(self, row: dict) -> dict:

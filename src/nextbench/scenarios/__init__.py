@@ -1,5 +1,6 @@
 import weave
 from .base_scenario import BaseScenario
+from .math500 import Math500Scenario
 
 DATASETS = {
     "MATH500": "weave:///ayut/NextBench/object/MATH500:YMovIwbHIlH2hxe70wriWldlxHwEfXnkfuDX4nvdbzw",
@@ -10,5 +11,6 @@ DATASETS = {
 
 __all__ = [
     "BaseScenario",
+    "Math500Scenario",
     "DATASETS",
 ]

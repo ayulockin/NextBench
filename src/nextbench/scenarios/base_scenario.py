@@ -8,12 +8,12 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
     system_prompt: str
     metric: weave.Scorer
 
-    def get_dataset_rows(self, ref: str) -> list[dict]:
+    def get_dataset_rows(self) -> list[dict]:
         """
         Returns the list of rows (dicts) from the chosen dataset. The dataset is provided as a weave Dataset ref.
         More info: https://weave-docs.wandb.ai/guides/core-types/datasets
         """
-        return weave.ref(ref).get().rows
+        return weave.ref(self.dataset_ref).get().rows
 
     @abc.abstractmethod
     def preprocess_input(self, row: dict) -> dict:
@@ -33,6 +33,7 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    @weave.op()
     def score(self, answer: str, output: RequestResult) -> bool:
         """
         The required method from weave.Scorer.
