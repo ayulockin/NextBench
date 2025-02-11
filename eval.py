@@ -6,7 +6,7 @@ import weave
 import asyncio
 
 from nextbench.clients import OpenAIClient
-from nextbench.scenarios import Math500Scenario
+from nextbench.scenarios import Math500Scenario, MMLUProScenario
 
 # Initialize the weave client
 weave_client = weave.init('nextbench-dev')
@@ -18,19 +18,33 @@ class ExactMatch(weave.Scorer):
         return answer == output
 
 
-scenario = Math500Scenario(metric=ExactMatch())
-
-evaluation = weave.Evaluation(
-    dataset=scenario.get_dataset_rows()[:2],
-    scorers=[scenario],
-    preprocess_model_input=scenario.preprocess_input,
+scenario1 = Math500Scenario(metric=ExactMatch())
+evaluation1 = weave.Evaluation(
+    dataset=scenario1.get_dataset_rows()[:2],
+    scorers=[scenario1],
+    preprocess_model_input=scenario1.preprocess_input,
 )
-
-client = OpenAIClient(
+client1 = OpenAIClient(
     model="gpt-4o-mini",
     temperature=0.0,
     max_completion_tokens=4096,
-    system_prompt=scenario.system_prompt, # TODO: don't like this implementation detail
+    system_prompt=scenario1.system_prompt,
+    enable_cache=False,
 )
 
-asyncio.run(evaluation.evaluate(client))
+scenario2 = MMLUProScenario(metric=ExactMatch())
+evaluation2 = weave.Evaluation(
+    dataset=scenario2.get_dataset_rows()[:2],
+    scorers=[scenario2],
+    preprocess_model_input=scenario2.preprocess_input,
+)
+client2 = OpenAIClient(
+    model="gpt-4o-mini",
+    temperature=0.0,
+    max_completion_tokens=4096,
+    system_prompt=scenario2.system_prompt,
+    enable_cache=True,
+)
+
+asyncio.run(evaluation1.evaluate(client1))
+asyncio.run(evaluation2.evaluate(client2))

@@ -22,6 +22,7 @@ class BaseLLMClient(weave.Model, ABC):
     temperature: float = 0.0
     max_completion_tokens: int = 4096
     system_prompt: str = ""
+    enable_cache: bool = True
 
     _cache: DiskCacheBackend = PrivateAttr(default=None)
 
@@ -53,7 +54,7 @@ class BaseLLMClient(weave.Model, ABC):
     async def predict(self, prompt: str) -> RequestResult:
         cache_key = self._generate_cache_key(prompt)
         # Check cache
-        if self._cache.has_key(cache_key):
+        if self._cache.has_key(cache_key) and self.enable_cache:
             cached_content = self._cache.get(cache_key)
             return RequestResult(
                 success=True,
@@ -80,7 +81,8 @@ class BaseLLMClient(weave.Model, ABC):
             error = "LLM call failed after 3 attempts."
 
         if content is not None and error is None:
-            self._cache.set(cache_key, content)
+            if self.enable_cache:
+                self._cache.set(cache_key, content)
             return RequestResult(
                 success=True,
                 cached=False,

@@ -22,6 +22,7 @@ class MMLUProScenario(BaseScenario):
         question = row["question"]
 
         options = row["options"]
+        # TODO: (ayulockin) shuffle options to avoid bias?
         options_str = "\n".join([f"{chr(65 + i)}. {option}" for i, option in enumerate(options)])
 
         prompt = (
