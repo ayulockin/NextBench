@@ -15,7 +15,10 @@ class Math500Scenario(BaseScenario):
     system_prompt: str = "Answer the question and return the answer in the \\boxed{} format."
 
     def preprocess_input(self, row: dict) -> dict:
-        question = row.get("question", "")
+        assert "question" in row, "Question column is required"
+        assert "answer" in row, "Answer column is required"
+
+        question = row["question"]
         prompt = (
             f"Question: {question}\n"
         )

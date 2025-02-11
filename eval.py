@@ -20,25 +20,17 @@ class ExactMatch(weave.Scorer):
 
 scenario = Math500Scenario(metric=ExactMatch())
 
-dataset = scenario.get_dataset_rows()
-# Check for column names for deciding the requirements for scenario
-keys = list(dataset.rows[0].keys())
-assert "question" in keys, "Question column is required"
-assert "answer" in keys, "Answer column is required"
-
 evaluation = weave.Evaluation(
-    dataset=dataset[:10],
+    dataset=scenario.get_dataset_rows()[:2],
     scorers=[scenario],
     preprocess_model_input=scenario.preprocess_input,
 )
 
-# Setup the client
 client = OpenAIClient(
     model="gpt-4o-mini",
     temperature=0.0,
     max_completion_tokens=4096,
-    system_prompt=scenario.system_prompt,
+    system_prompt=scenario.system_prompt, # TODO: don't like this implementation detail
 )
 
-# Run the evaluation
 asyncio.run(evaluation.evaluate(client))
