@@ -27,6 +27,19 @@ python eval.py
 
 The following will load the MATH500 and MMLU-Pro datasets and run the evaluation using the exact match metric.
 
+## TODOs
+
+- [x] Scenarios are defined as classes in the `src/nextbench/scenarios` directory.
+- [x] Caching of results.
+- [x] Caching of datasets (because Weave caching is not working for datasets atm).
+- [x] System prompts are defined as `weave.StringPrompt` and published to W&B for better tracking.
+- [x] Configurable number of samples to evaluate from the dataset.
+- [x] OpenAI client
+- [x] Package everything as a CLI tool from eval.py file.
+- [ ] Add more clients (e.g. Groq, Anthropic, Gemini, etc.)
+- [ ] Add more scenarios (e.g. GPQA-Diamond, LiveCodeBench, etc.)
+- [ ] Make it more configurable and user friendly.
+
 <details>
 <summary>Citations</summary>
 
