@@ -25,7 +25,7 @@ Each benchmark must have a `question` and `answer` column. If the original bench
 python eval.py
 ```
 
-The following will load the MATH500 dataset and run the evaluation using the exact match metric.
+The following will load the MATH500 and MMLU-Pro datasets and run the evaluation using the exact match metric.
 
 <details>
 <summary>Citations</summary>
