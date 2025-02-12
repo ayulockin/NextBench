@@ -13,6 +13,7 @@ def parse_option_number(completion: str) -> str:
 class MMLUProScenario(BaseScenario):
     dataset_ref: str = "weave:///ayut/NextBench/object/MMLU-Pro:LWM5rEQyK1lQEdrPvCZNhfY7Tce3R7xD86X4FhZtgjE"
     system_prompt: str = "Select the most appropriate answer from the given options and return the correct option number in the \\boxed{} format"
+    scenario_name: str = "MMLU-Pro"
 
     def preprocess_input(self, row: dict) -> dict:
         assert "question" in row, "Question column is required"

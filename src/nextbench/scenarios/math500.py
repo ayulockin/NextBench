@@ -13,6 +13,7 @@ def parse_math_answer(completion: str) -> str:
 class Math500Scenario(BaseScenario):
     dataset_ref: str = "weave:///ayut/NextBench/object/MATH500:YMovIwbHIlH2hxe70wriWldlxHwEfXnkfuDX4nvdbzw"
     system_prompt: str = "Answer the question and return the answer in the \\boxed{} format."
+    scenario_name: str = "MATH500"
 
     def preprocess_input(self, row: dict) -> dict:
         assert "question" in row, "Question column is required"

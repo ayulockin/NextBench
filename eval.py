@@ -29,8 +29,8 @@ client1 = OpenAIClient(
     model="gpt-4o-mini",
     temperature=0.0,
     max_completion_tokens=4096,
-    system_prompt=scenario1.system_prompt,
-    enable_cache=False,
+    system_prompt=scenario1.system_prompt.content,
+    enable_cache=True,
 )
 
 scenario2 = MMLUProScenario(metric=ExactMatch())
@@ -44,7 +44,7 @@ client2 = OpenAIClient(
     model="gpt-4o-mini",
     temperature=0.0,
     max_completion_tokens=4096,
-    system_prompt=scenario2.system_prompt,
+    system_prompt=scenario2.system_prompt.content,
     enable_cache=True,
 )
 

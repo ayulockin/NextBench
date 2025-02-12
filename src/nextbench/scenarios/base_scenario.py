@@ -1,5 +1,6 @@
 import abc
 import weave
+from typing import Any
 from weave.trace.vals import WeaveList, WeaveDict
 
 from nextbench.utils import RequestResult
@@ -30,6 +31,12 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
     dataset_ref: str
     system_prompt: str
     metric: weave.Scorer
+    scenario_name: str
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        self.system_prompt = weave.StringPrompt(self.system_prompt)
+        weave.publish(self.system_prompt, name=self.scenario_name)
 
     @cacher(DiskCacheBackend(".cache/datasets"))
     def get_dataset_rows(self) -> list[dict]:
