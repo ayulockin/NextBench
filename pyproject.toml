@@ -13,6 +13,7 @@ dependencies = [
     "pytest-asyncio>=0.25.3",
     "python-dotenv>=1.0.1",
     "tenacity>=9.0.0",
+    "typer>=0.15.1",
     "wandb>=0.19.1",
     "weave>=0.51.25",
 ]
