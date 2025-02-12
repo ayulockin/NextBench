@@ -11,7 +11,7 @@ def parse_option_number(completion: str) -> str:
 
 
 class MMLUProScenario(BaseScenario):
-    dataset_ref: str = "weave:///ayut/NextBench/object/MMLU-Pro:wYUCYcoPDOJgPFjEcKyqNNam0PI85uXA6LLuerXjnX4"
+    dataset_ref: str = "weave:///ayut/NextBench/object/MMLU-Pro:LWM5rEQyK1lQEdrPvCZNhfY7Tce3R7xD86X4FhZtgjE"
     system_prompt: str = "Select the most appropriate answer from the given options and return the correct option number in the \\boxed{} format"
 
     def preprocess_input(self, row: dict) -> dict:
@@ -21,7 +21,8 @@ class MMLUProScenario(BaseScenario):
 
         question = row["question"]
 
-        options = row["options"]
+        options = list(row["options"])
+        assert isinstance(options, list)
         # TODO: (ayulockin) shuffle options to avoid bias?
         options_str = "\n".join([f"{chr(65 + i)}. {option}" for i, option in enumerate(options)])
 

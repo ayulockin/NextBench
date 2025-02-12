@@ -95,22 +95,22 @@ def cacher(cache_backend: Optional[CacheInterface] = None):
             cache_key = _generate_cache_key(func, args, kwargs)
 
             if backend.has_key(cache_key):
-                return backend.get(cache_key), True
+                return backend.get(cache_key)
 
             result = await func(*args, **kwargs)
             backend.set(cache_key, result)
-            return result, False
+            return result
 
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
             cache_key = _generate_cache_key(func, args, kwargs)
 
             if backend.has_key(cache_key):
-                return backend.get(cache_key), True
+                return backend.get(cache_key)
 
             result = func(*args, **kwargs)
             backend.set(cache_key, result)
-            return result, False
+            return result
 
         return async_wrapper if is_async else sync_wrapper
 

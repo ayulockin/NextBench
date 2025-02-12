@@ -1,6 +1,29 @@
 import abc
 import weave
+from weave.trace.vals import WeaveList, WeaveDict
+
 from nextbench.utils import RequestResult
+from nextbench.utils import cacher, DiskCacheBackend
+
+
+def to_plain_object(obj):
+    """
+    Recursively convert WeaveDict and WeaveList objects into plain Python dicts and lists.
+    Any nested WeaveDict/WeaveList is also converted.
+    """
+    # Check for WeaveList: convert to a list of plain objects.
+    if hasattr(weave, "WeaveList") and isinstance(obj, WeaveList):
+        return [to_plain_object(item) for item in list(obj)]
+    # Check for WeaveDict: convert to a dict with plain objects.
+    elif hasattr(weave, "WeaveDict") and isinstance(obj, WeaveDict):
+        return {key: to_plain_object(value) for key, value in obj.items()}
+    # Also handle regular lists and dicts recursively.
+    elif isinstance(obj, list):
+        return [to_plain_object(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {key: to_plain_object(value) for key, value in obj.items()}
+    else:
+        return obj
 
 
 class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
@@ -8,12 +31,14 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
     system_prompt: str
     metric: weave.Scorer
 
+    @cacher(DiskCacheBackend(".cache/datasets"))
     def get_dataset_rows(self) -> list[dict]:
         """
         Returns the list of rows (dicts) from the chosen dataset. The dataset is provided as a weave Dataset ref.
         More info: https://weave-docs.wandb.ai/guides/core-types/datasets
         """
-        return weave.ref(self.dataset_ref).get().rows
+        raw_rows = weave.ref(self.dataset_ref).get().rows
+        return [to_plain_object(row) for row in raw_rows]
 
     @abc.abstractmethod
     def preprocess_input(self, row: dict) -> dict:

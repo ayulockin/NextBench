@@ -19,8 +19,9 @@ class ExactMatch(weave.Scorer):
 
 
 scenario1 = Math500Scenario(metric=ExactMatch())
+dataset1 = scenario1.get_dataset_rows()
 evaluation1 = weave.Evaluation(
-    dataset=scenario1.get_dataset_rows()[:2],
+    dataset=dataset1[:2],
     scorers=[scenario1],
     preprocess_model_input=scenario1.preprocess_input,
 )
@@ -33,8 +34,9 @@ client1 = OpenAIClient(
 )
 
 scenario2 = MMLUProScenario(metric=ExactMatch())
+dataset2 = scenario2.get_dataset_rows()
 evaluation2 = weave.Evaluation(
-    dataset=scenario2.get_dataset_rows()[:2],
+    dataset=dataset2[:2],
     scorers=[scenario2],
     preprocess_model_input=scenario2.preprocess_input,
 )
