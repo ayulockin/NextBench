@@ -1,15 +1,18 @@
-import asyncio
 import warnings
-import weave
+warnings.filterwarnings("ignore", category=UserWarning)
+
+import asyncio
 import typer
 from enum import Enum
 from typing import Annotated
 
-# Ignore user warnings
-warnings.filterwarnings("ignore", category=UserWarning)
+import weave
+from weave.flow import leaderboard
+from weave.trace.weave_client import get_ref
 
 from nextbench.clients import OpenAIClient
 from nextbench.scenarios import Math500Scenario, MMLUProScenario
+
 
 # Metrics
 class ExactMatch(weave.Scorer):
@@ -64,8 +67,10 @@ async def run_evaluation(scenario, dataset, enable_cache: bool):
         system_prompt=scenario.system_prompt.content,
         enable_cache=enable_cache,
     )
-    results = await evaluation.evaluate(client)
-    return results
+    results = await evaluation.evaluate(
+        client, __weave={"display_name": client.client_name + ":" + client.model}
+    )
+    return results, evaluation
 
 
 app = typer.Typer()
@@ -96,6 +101,7 @@ def evaluate(
         scenario_names = [scenario.value]
 
     async def run_all():
+        leaderboard_columns = []
         for scenario_name in scenario_names:
             typer.echo(
                 typer.style(
@@ -103,11 +109,37 @@ def evaluate(
                 )
             )
             scenario_instance, dataset = get_scenario_and_dataset(scenario_name, num_samples)
-            result = await run_evaluation(scenario_instance, dataset, enable_cache)
-            # TODO: save the results to a file?
+            result, evaluation = await run_evaluation(scenario_instance, dataset, enable_cache)
 
-    asyncio.run(run_all())
+            leaderboard_columns.append(
+                leaderboard.LeaderboardColumn(
+                    evaluation_object_ref=get_ref(evaluation).uri(),
+                    scorer_name=type(scenario_instance).__name__,
+                    summary_metric_path="true_fraction",
+                )
+            )
 
+        return leaderboard_columns
+
+    leaderboard_columns = asyncio.run(run_all())
+
+
+    spec = leaderboard.Leaderboard(
+        name="NextBench (LLM Benchmarks)",
+        description="""This leaderboard compares the performance of LLMs on a variety of hard benchmarks.
+
+        Add more details here.
+        """,
+        columns=leaderboard_columns,
+    )
+
+    ref = weave.publish(spec)
+
+    typer.echo(
+        typer.style(
+            f"Leaderboard published at {ref}", fg=typer.colors.GREEN, bold=True
+        )
+    )
 
 if __name__ == "__main__":
     app()
