@@ -60,19 +60,14 @@ def _make_hashable(o):
         return o
 
 
-EXCLUDE_KEYS = ["callbacks"]
-
-
 def _generate_cache_key(func, args, kwargs):
     if inspect.ismethod(func):
         args = args[1:]
 
-    filtered_kwargs = {k: v for k, v in kwargs.items() if k not in EXCLUDE_KEYS}
-
     key_data = {
         "function": func.__qualname__,
         "args": _make_hashable(args),
-        "kwargs": _make_hashable(filtered_kwargs),
+        "kwargs": _make_hashable(kwargs),
     }
 
     key_string = json.dumps(key_data, sort_keys=True, default=str)

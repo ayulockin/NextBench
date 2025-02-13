@@ -1,4 +1,4 @@
-from .base_client import BaseLLMClient
+from .base import BaseLLMClient
 from .openai_client import OpenAIClient
 
 __all__ = [
