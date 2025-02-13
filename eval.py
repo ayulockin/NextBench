@@ -102,6 +102,7 @@ def evaluate(
 
     async def run_all():
         leaderboard_columns = []
+        evaluations = []
         for scenario_name in scenario_names:
             typer.echo(
                 typer.style(
@@ -111,6 +112,8 @@ def evaluate(
             scenario_instance, dataset = get_scenario_and_dataset(scenario_name, num_samples)
             result, evaluation = await run_evaluation(scenario_instance, dataset, enable_cache)
 
+            print(result)
+
             leaderboard_columns.append(
                 leaderboard.LeaderboardColumn(
                     evaluation_object_ref=get_ref(evaluation).uri(),
@@ -118,10 +121,12 @@ def evaluate(
                     summary_metric_path="true_fraction",
                 )
             )
+            evaluations.append(get_ref(evaluation).uri())
+        return leaderboard_columns, evaluations
 
-        return leaderboard_columns
+    leaderboard_columns, evaluations = asyncio.run(run_all())
 
-    leaderboard_columns = asyncio.run(run_all())
+    print(evaluations)
 
 
     spec = leaderboard.Leaderboard(
