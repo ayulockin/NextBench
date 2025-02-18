@@ -1,0 +1,20 @@
+models:
+  - name: "gpt-4o"
+    display_name: "GPT-4o"
+    creator_organization_name: "OpenAI"
+    access: "proprietary"
+    release_date: "2024-08-06"
+    client_spec:
+      class_name: "nextbench.clients.openai_client.OpenAIClient"
+      temperature: 0.0
+      max_completion_tokens: 4096
+
+  - name: "gpt-4o-mini"
+    display_name: "GPT-4o Mini"
+    creator_organization_name: "OpenAI"
+    access: "proprietary"
+    release_date: "2024-08-06"
+    client_spec:
+      class_name: "nextbench.clients.openai_client.OpenAIClient"
+      temperature: 0.0
+      max_completion_tokens: 4096
