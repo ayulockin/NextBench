@@ -6,8 +6,8 @@ models:
     release_date: "2024-08-06"
     client_spec:
       class_name: "nextbench.clients.openai_client.OpenAIClient"
-      temperature: 0.0
-      max_completion_tokens: 4096
+      args:
+        temperature: 0.0
 
   - name: "gpt-4o-mini"
     display_name: "GPT-4o Mini"
@@ -16,5 +16,5 @@ models:
     release_date: "2024-08-06"
     client_spec:
       class_name: "nextbench.clients.openai_client.OpenAIClient"
-      temperature: 0.0
-      max_completion_tokens: 4096
+      args:
+        temperature: 0.0

@@ -1,5 +1,6 @@
 import os
 import yaml
+from typing import Any
 from pydantic import BaseModel
 
 MODEL_DEPLOYMENTS_FILE: str = "models.yaml"
@@ -7,8 +8,7 @@ MODEL_DEPLOYMENTS_FILE: str = "models.yaml"
 
 class ClientSpec(BaseModel):
     class_name: str
-    temperature: float
-    max_completion_tokens: int
+    args: dict[str, Any]
 
 
 class ModelConfig(BaseModel):
@@ -18,6 +18,9 @@ class ModelConfig(BaseModel):
     access: str
     release_date: str
     client_spec: ClientSpec
+
+
+MODEL_CONFIGS: dict[str, ModelConfig] = {}
 
 
 def register_model_configs() -> None:
@@ -31,9 +34,9 @@ def register_model_configs() -> None:
 
     for model_deployment in model_deployments:
         model_config = ModelConfig(**model_deployment)
-        print(model_config)
-        print("--------------------------------")
+        MODEL_CONFIGS[model_config.name] = model_config
 
 
 if __name__ == "__main__":
     register_model_configs()
+    print(MODEL_CONFIGS)

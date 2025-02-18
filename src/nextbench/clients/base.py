@@ -90,6 +90,7 @@ class BaseLLMClient(weave.Model, ABC):
                 error=None
             )
         else:
+            print(f"Error in predict: {error}")
             return RequestResult(
                 success=False,
                 cached=False,
