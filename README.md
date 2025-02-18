@@ -41,7 +41,7 @@ The following will load the MATH500 and MMLU-Pro datasets and run the evaluation
 - [ ] DSPY prompt optimization.
 - [ ] Add more clients (e.g. Groq, Anthropic, Gemini, etc.)
 - [ ] Add more scenarios (e.g. GPQA-Diamond, LiveCodeBench, etc.)
-- [ ] Make it more configurable and user friendly.
+- [x] Make it more configurable and user friendly.
 
 <details>
 <summary>Citations</summary>
