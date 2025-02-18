@@ -5,7 +5,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 import asyncio
 import importlib
 from enum import Enum
-from typing import Annotated
+from typing import Optional
 
 import typer
 import weave
@@ -55,7 +55,7 @@ def load_scenario(scenario_name: str) -> BaseScenario:
     scenario_spec = scenario_config.scenario_spec
     scenario_class = dynamic_import(scenario_spec.class_name)
     # NOTE: We only support one metric per scenario for now. In future we will support multiple metrics.
-    metric = ExactMatch() if scenario_spec.metric_name == "exact_match" else None
+    metric = ExactMatch() if scenario_spec.metric_name == "exact_match" else None  # type: ignore
     scenario = scenario_class(metric=metric)
     return scenario
 
@@ -78,7 +78,7 @@ def load_client(model_name: str, enable_cache: bool) -> BaseLLMClient:
 async def run_single_evaluation(
     scenario: BaseScenario,
     client: BaseLLMClient,
-    num_samples: int,
+    num_samples: Optional[int],
 ):
     """
     Run the evaluation for a given scenario and client.
@@ -90,7 +90,7 @@ async def run_single_evaluation(
     :return: The obtained results from the evaluation.
     """
     # Initialize the evaluation
-    evaluation = weave.Evaluation(
+    evaluation = weave.Evaluation(  # type: ignore
         dataset=scenario.get_dataset_rows(num_samples),
         scorers=[scenario],
         preprocess_model_input=scenario.preprocess_input,
@@ -108,7 +108,7 @@ async def run_single_evaluation(
 async def run(
     scenario_name: str,
     model_name: str,
-    num_samples: int,
+    num_samples: Optional[int],
     enable_cache: bool,
 ):
     typer.echo(
@@ -145,10 +145,22 @@ def evaluate(
             name for name in MODEL_CONFIGS.keys() if name.startswith(incomplete)
         ],
     ),
-    num_samples: int = None,
-    enable_cache: bool = True,
-    weave_project: str = "nextbench-dev",
-    weave_entity: str = None,
+    num_samples: Optional[int] = typer.Option(
+        help="The number of samples to evaluate. If not provided, all samples will be evaluated.",
+        default=None,
+    ),
+    enable_cache: bool = typer.Option(
+        help="Whether to enable caching.",
+        default=True,
+    ),
+    weave_project: str = typer.Option(
+        help="The W&B project where you want to log the evaluations.",
+        default="nextbench-dev",
+    ),
+    weave_entity: Optional[str] = typer.Option(
+        help="The W&B entity where you want to log the evaluations.",
+        default=None,
+    ),
 ):
     """
     Run evaluation scenarios for NextBench.

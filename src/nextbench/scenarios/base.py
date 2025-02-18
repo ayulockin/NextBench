@@ -29,7 +29,7 @@ def to_plain_object(obj):
 
 class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
     dataset_ref: str
-    system_prompt: str
+    system_prompt: weave.StringPrompt
     metric: weave.Scorer
     scenario_name: str
 
