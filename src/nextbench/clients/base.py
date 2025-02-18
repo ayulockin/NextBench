@@ -1,19 +1,16 @@
-import weave
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
+import weave
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from pydantic import PrivateAttr
-from tenacity import (
-    AsyncRetrying,
-    stop_after_attempt,
-    wait_random_exponential,
-    RetryError,
-)
-from nextbench.utils import RequestResult
-from nextbench.utils import DiskCacheBackend
+from tenacity import (AsyncRetrying, RetryError, stop_after_attempt,
+                      wait_random_exponential)
+
+from nextbench.utils import DiskCacheBackend, RequestResult
 
 
 class BaseLLMClient(weave.Model, ABC):
@@ -84,16 +81,10 @@ class BaseLLMClient(weave.Model, ABC):
             if self.enable_cache:
                 self._cache.set(cache_key, content)
             return RequestResult(
-                success=True,
-                cached=False,
-                completions=[content],
-                error=None
+                success=True, cached=False, completions=[content], error=None
             )
         else:
             print(f"Error in predict: {error}")
             return RequestResult(
-                success=False,
-                cached=False,
-                completions=[],
-                error=error
+                success=False, cached=False, completions=[], error=error
             )

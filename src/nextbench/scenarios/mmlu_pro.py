@@ -1,5 +1,6 @@
-import weave
 import re
+
+import weave
 
 from nextbench.scenarios import BaseScenario
 from nextbench.utils import RequestResult
@@ -7,12 +8,16 @@ from nextbench.utils import RequestResult
 
 @weave.op()
 def parse_option_number(completion: str) -> str:
-    return re.search(r'\\boxed{(.*)}', completion).group(1)
+    return re.search(r"\\boxed{(.*)}", completion).group(1)
 
 
 class MMLUProScenario(BaseScenario):
-    dataset_ref: str = "weave:///ayut/NextBench/object/MMLU-Pro:LWM5rEQyK1lQEdrPvCZNhfY7Tce3R7xD86X4FhZtgjE"
-    system_prompt: str = "Select the most appropriate answer from the given options and return the correct option number in the \\boxed{} format"
+    dataset_ref: str = (
+        "weave:///ayut/NextBench/object/MMLU-Pro:LWM5rEQyK1lQEdrPvCZNhfY7Tce3R7xD86X4FhZtgjE"
+    )
+    system_prompt: str = (
+        "Select the most appropriate answer from the given options and return the correct option number in the \\boxed{} format"
+    )
     scenario_name: str = "MMLU-Pro"
 
     def preprocess_input(self, row: dict) -> dict:
@@ -25,18 +30,17 @@ class MMLUProScenario(BaseScenario):
         options = list(row["options"])
         assert isinstance(options, list)
         # TODO: (ayulockin) shuffle options to avoid bias?
-        options_str = "\n".join([f"{chr(65 + i)}. {option}" for i, option in enumerate(options)])
-
-        prompt = (
-            f"Question: {question}\n"
-            f"{options_str}\n"
+        options_str = "\n".join(
+            [f"{chr(65 + i)}. {option}" for i, option in enumerate(options)]
         )
+
+        prompt = f"Question: {question}\n" f"{options_str}\n"
         return {"prompt": prompt}
 
     def postprocess_output(self, output: RequestResult) -> str:
         raw_text = output.completions[0] if output.completions else ""
         return parse_option_number(raw_text)
-    
+
 
 if __name__ == "__main__":
     # Define a dummy metric for testing purposes.
@@ -52,16 +56,13 @@ if __name__ == "__main__":
     test_row = {
         "question": "What is the capital of France?",
         "options": ["Berlin", "Madrid", "Paris", "Rome"],
-        "answer": "C"
+        "answer": "C",
     }
     input_data = scenario.preprocess_input(test_row)
 
     # Simulate a RequestResult with a correctly formatted boxed answer.
     test_result = RequestResult(
-        success=True,
-        cached=False,
-        completions=["\\boxed{C}"],
-        error=None
+        success=True, cached=False, completions=["\\boxed{C}"], error=None
     )
 
     # Process the output.

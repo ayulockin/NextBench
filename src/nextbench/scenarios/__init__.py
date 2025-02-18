@@ -1,4 +1,5 @@
 import weave
+
 from .base import BaseScenario
 from .math500 import Math500Scenario
 from .mmlu_pro import MMLUProScenario

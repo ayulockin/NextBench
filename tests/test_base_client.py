@@ -1,6 +1,7 @@
-import pytest
-from unittest.mock import MagicMock, AsyncMock
 import asyncio
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from nextbench.clients.base_client import BaseLLMClient
 from nextbench.utils import RequestResult
@@ -10,6 +11,7 @@ class MockLLMClient(BaseLLMClient):
     """
     A concrete subclass of BaseLLMClient used for testing.
     """
+
     async def _run_llm_call(self, prompt: str) -> str:
         """
         A mock implementation to simulate LLM call.
@@ -73,4 +75,6 @@ async def test_predict_when_not_cached_success():
     assert result.success is True
     assert result.cached is False
     assert result.completions == ["Mock LLM response"]
-    mock_cache.set.assert_called_once_with(client._generate_cache_key(prompt), "Mock LLM response")
+    mock_cache.set.assert_called_once_with(
+        client._generate_cache_key(prompt), "Mock LLM response"
+    )

@@ -1,6 +1,7 @@
 import os
-import yaml
 from typing import Any
+
+import yaml
 from pydantic import BaseModel
 
 MODEL_DEPLOYMENTS_FILE: str = "models.yaml"
@@ -42,7 +43,9 @@ def register_model_configs() -> None:
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
     model_deployments_path = os.path.join(repo_root, MODEL_DEPLOYMENTS_FILE)
     if not os.path.exists(model_deployments_path):
-        raise FileNotFoundError(f"Model deployments file not found at {model_deployments_path}")
+        raise FileNotFoundError(
+            f"Model deployments file not found at {model_deployments_path}"
+        )
 
     with open(model_deployments_path, "r") as f:
         model_deployments = yaml.safe_load(f)["models"]
@@ -56,7 +59,9 @@ def register_scenario_configs() -> None:
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
     scenario_deployments_path = os.path.join(repo_root, SCENARIO_DEPLOYMENTS_FILE)
     if not os.path.exists(scenario_deployments_path):
-        raise FileNotFoundError(f"Scenario deployments file not found at {scenario_deployments_path}")
+        raise FileNotFoundError(
+            f"Scenario deployments file not found at {scenario_deployments_path}"
+        )
 
     with open(scenario_deployments_path, "r") as f:
         scenario_deployments = yaml.safe_load(f)["scenarios"]

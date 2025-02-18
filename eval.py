@@ -1,24 +1,27 @@
 import warnings
+
 warnings.filterwarnings("ignore", category=UserWarning)
 
 import asyncio
-import typer
 import importlib
 from enum import Enum
 from typing import Annotated
 
+import typer
 import weave
 from weave.flow import leaderboard
 from weave.trace.weave_client import get_ref
 
-from nextbench.clients import OpenAIClient, BaseLLMClient
-from nextbench.scenarios import Math500Scenario, MMLUProScenario, BaseScenario
-from nextbench.configs.config_registry import (
-    register_model_configs, register_scenario_configs, SCENARIO_CONFIGS, MODEL_CONFIGS
-)
+from nextbench.clients import BaseLLMClient
+from nextbench.configs.config_registry import (MODEL_CONFIGS, SCENARIO_CONFIGS,
+                                               register_model_configs,
+                                               register_scenario_configs)
+from nextbench.scenarios import BaseScenario
 
-register_model_configs()
 register_scenario_configs()
+register_model_configs()
+
+app = typer.Typer()
 
 
 # Metrics
@@ -26,7 +29,7 @@ class ExactMatch(weave.Scorer):
     @weave.op()
     def score(self, answer: str, output: str) -> bool:
         return answer == output
-    
+
 
 class ScenarioChoice(str, Enum):
     math500 = "math500"
@@ -37,7 +40,7 @@ class ScenarioChoice(str, Enum):
 def dynamic_import(class_path: str):
     """
     Dynamically import a class from a string path.
-    
+
     :param class_path: The full path to the class (e.g. "nextbench.clients.openai_client.OpenAIClient").
     :return: The class object.
     """
@@ -92,63 +95,77 @@ async def run_single_evaluation(
         scorers=[scenario],
         preprocess_model_input=scenario.preprocess_input,
     )
-    
+
     # Configure the system prompt for the client
     client.system_prompt = scenario.system_prompt.content
-    
+
     # Run the evaluation
     eval_name = f"{client.client_name}:{client.model}-{scenario.scenario_name}"
-    results = await evaluation.evaluate(
-        client, __weave={"display_name": eval_name}
-    )
+    results = await evaluation.evaluate(client, __weave={"display_name": eval_name})
     return results, evaluation
 
 
-app = typer.Typer()
+async def run(
+    scenario_name: str,
+    model_name: str,
+    num_samples: int,
+    enable_cache: bool,
+):
+    typer.echo(
+        typer.style(
+            f"Evaluating model: {model_name} on {scenario_name}",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
+
+    scenario_instance = load_scenario(scenario_name)
+    client = load_client(model_name, enable_cache)
+
+    result, evaluation = await run_single_evaluation(
+        scenario_instance,
+        client,
+        num_samples,
+    )
+
+    return result, evaluation
 
 
 @app.command()
 def evaluate(
-    scenario: Annotated[
-        ScenarioChoice, typer.Option(case_sensitive=False)
-    ] = ScenarioChoice.all,
+    scenario_name: str = typer.Option(
+        help="The name of the scenario to evaluate.",
+        case_sensitive=True,
+    ),
     model_name: str = typer.Option(
-        "gpt-4o",
         help="The name of the model to use for evaluation.",
         case_sensitive=True,
-        show_default=True,
         prompt="Please choose a model",
-        autocompletion=lambda incomplete: [name for name in MODEL_CONFIGS.keys() if name.startswith(incomplete)]
+        autocompletion=lambda incomplete: [
+            name for name in MODEL_CONFIGS.keys() if name.startswith(incomplete)
+        ],
     ),
     num_samples: int = None,
     enable_cache: bool = True,
+    weave_project: str = "nextbench-dev",
+    weave_entity: str = None,
 ):
     """
     Run evaluation scenarios for NextBench.
 
-    SCENARIO: Choose the evaluation scenario ("math500", "mmlupro" or "all").
-    NUM_SAMPLES: Number of samples to evaluate from the dataset.
+    :param scenario: The scenario to evaluate.
+    :param model_name: The name of the model to use for evaluation.
+    :param num_samples: The number of samples to evaluate.
+    :param enable_cache: Whether to enable caching.
     """
     # Initialize the weave client
-    weave.init("nextbench-dev")
+    if weave_entity is None:
+        weave.init(weave_project)
+    else:
+        weave.init(f"{weave_entity}/{weave_project}")
 
-    async def run():
-        typer.echo(
-            typer.style(
-                f"Evaluating model: {model_name} on {scenario}", fg=typer.colors.GREEN, bold=True
-            )
-        )
+    return asyncio.run(run(scenario_name, model_name, num_samples, enable_cache))
 
-        scenario_instance = load_scenario(scenario)
-        client = load_client(model_name, enable_cache)
-
-        result, evaluation = await run_single_evaluation(
-            scenario_instance,
-            client,
-            num_samples,
-        )
-
-    return asyncio.run(run())
 
 if __name__ == "__main__":
     app()

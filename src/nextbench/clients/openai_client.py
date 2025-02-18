@@ -1,6 +1,7 @@
-import weave
 import os
 from typing import Any
+
+import weave
 from pydantic import PrivateAttr
 
 from nextbench.clients import BaseLLMClient
@@ -42,6 +43,7 @@ if __name__ == "__main__":
     weave_client = weave.init("nextbench-dev")
 
     client = OpenAIClient()
+
     async def main():
         # First call
         result = await client.predict("What is the capital of India?")

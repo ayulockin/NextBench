@@ -1,10 +1,10 @@
 import abc
-import weave
 from typing import Any
-from weave.trace.vals import WeaveList, WeaveDict
 
-from nextbench.utils import RequestResult
-from nextbench.utils import cacher, DiskCacheBackend
+import weave
+from weave.trace.vals import WeaveDict, WeaveList
+
+from nextbench.utils import DiskCacheBackend, RequestResult, cacher
 
 
 def to_plain_object(obj):
@@ -71,7 +71,7 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
     def score(self, answer: str, output: RequestResult) -> bool:
         """
         The required method from weave.Scorer.
-        Compares the ground truth 'answer' with the parsed output 
+        Compares the ground truth 'answer' with the parsed output
         (by default `postprocess_output`) to yield a boolean or numeric metric.
         """
         try:
@@ -82,7 +82,7 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
         return self.metric.score(answer, prediction)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # These tests assume that the BaseScenario class (defined in this file)
     # is the abstract base class for scenarios. We create a dummy concrete
     # subclass to allow instantiation and testing.
@@ -111,16 +111,10 @@ if __name__ == '__main__':
 
     # Create dummy RequestResult instances to simulate LLM output.
     correct_result = RequestResult(
-        success=True,
-        cached=False,
-        completions=["42"],
-        error=None
+        success=True, cached=False, completions=["42"], error=None
     )
     incorrect_result = RequestResult(
-        success=True,
-        cached=False,
-        completions=["24"],
-        error=None
+        success=True, cached=False, completions=["24"], error=None
     )
 
     # Instantiate our dummy scenario.
