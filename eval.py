@@ -13,9 +13,12 @@ from weave.trace.weave_client import get_ref
 
 from nextbench.clients import OpenAIClient, BaseLLMClient
 from nextbench.scenarios import Math500Scenario, MMLUProScenario, BaseScenario
-from nextbench.configs.config_registry import register_model_configs, MODEL_CONFIGS
+from nextbench.configs.config_registry import (
+    register_model_configs, register_scenario_configs, SCENARIO_CONFIGS, MODEL_CONFIGS
+)
 
 register_model_configs()
+register_scenario_configs()
 
 
 # Metrics
@@ -31,18 +34,6 @@ class ScenarioChoice(str, Enum):
     all = "all"
 
 
-# TODO: load it dynamically from the config registry
-def load_scenario(scenario_name: str) -> BaseScenario:
-    """Returns an instance of the scenario."""
-    if scenario_name == "math500":
-        scenario = Math500Scenario(metric=ExactMatch())
-    elif scenario_name == "mmlupro":
-        scenario = MMLUProScenario(metric=ExactMatch())
-    else:
-        raise ValueError(f"Unknown scenario: {scenario_name}")
-    return scenario
-
-
 def dynamic_import(class_path: str):
     """
     Dynamically import a class from a string path.
@@ -53,6 +44,17 @@ def dynamic_import(class_path: str):
     module_path, class_name = class_path.rsplit(".", 1)
     module = importlib.import_module(module_path)
     return getattr(module, class_name)
+
+
+def load_scenario(scenario_name: str) -> BaseScenario:
+    """Returns an instance of the scenario."""
+    scenario_config = SCENARIO_CONFIGS[scenario_name]
+    scenario_spec = scenario_config.scenario_spec
+    scenario_class = dynamic_import(scenario_spec.class_name)
+    # NOTE: We only support one metric per scenario for now. In future we will support multiple metrics.
+    metric = ExactMatch() if scenario_spec.metric_name == "exact_match" else None
+    scenario = scenario_class(metric=metric)
+    return scenario
 
 
 def load_client(model_name: str, enable_cache: bool) -> BaseLLMClient:

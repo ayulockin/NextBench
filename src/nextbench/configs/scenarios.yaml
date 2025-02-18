@@ -1,0 +1,16 @@
+scenarios:
+  - name: "math500"
+    display_name: "Math500"
+    creator_organization_name: "OpenAI"
+    source: "https://huggingface.co/datasets/HuggingFaceH4/MATH-500"
+    scenario_spec:
+      class_name: "nextbench.scenarios.math500.Math500Scenario"
+      metric_name: "exact_match"
+
+  - name: "mmlupro"
+    display_name: "MMLU-Pro"
+    creator_organization_name: "TIGER-Lab"
+    source: "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro"
+    scenario_spec:
+      class_name: "nextbench.scenarios.mmlu_pro.MMLUProScenario"
+      metric_name: "exact_match"
