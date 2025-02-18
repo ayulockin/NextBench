@@ -21,8 +21,10 @@ Each benchmark must have a `question` and `answer` column. If the original bench
 
 ## Run Evaluation
 
+An example evaluation command is shown below:
+
 ```bash
-python eval.py
+python eval.py --model-name gpt-4o-mini --scenario math500 --num-samples 100 --no-enable-cache
 ```
 
 The following will load the MATH500 and MMLU-Pro datasets and run the evaluation using the exact match metric.

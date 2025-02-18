@@ -3,6 +3,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 import asyncio
 import typer
+import importlib
 from enum import Enum
 from typing import Annotated
 
@@ -10,8 +11,14 @@ import weave
 from weave.flow import leaderboard
 from weave.trace.weave_client import get_ref
 
-from nextbench.clients import OpenAIClient
-from nextbench.scenarios import Math500Scenario, MMLUProScenario
+from nextbench.clients import OpenAIClient, BaseLLMClient
+from nextbench.scenarios import Math500Scenario, MMLUProScenario, BaseScenario
+from nextbench.configs.config_registry import (
+    register_model_configs, register_scenario_configs, SCENARIO_CONFIGS, MODEL_CONFIGS
+)
+
+register_model_configs()
+register_scenario_configs()
 
 
 # Metrics
@@ -27,48 +34,72 @@ class ScenarioChoice(str, Enum):
     all = "all"
 
 
-def get_scenario_and_dataset(scenario_name: str, num_samples: int):
+def dynamic_import(class_path: str):
     """
-    Returns an instance of the scenario and a subset of its dataset.
+    Dynamically import a class from a string path.
     
-    :param scenario_name: Name of the scenario ('math500' or 'mmlupro').
+    :param class_path: The full path to the class (e.g. "nextbench.clients.openai_client.OpenAIClient").
+    :return: The class object.
+    """
+    module_path, class_name = class_path.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, class_name)
+
+
+def load_scenario(scenario_name: str) -> BaseScenario:
+    """Returns an instance of the scenario."""
+    scenario_config = SCENARIO_CONFIGS[scenario_name]
+    scenario_spec = scenario_config.scenario_spec
+    scenario_class = dynamic_import(scenario_spec.class_name)
+    # NOTE: We only support one metric per scenario for now. In future we will support multiple metrics.
+    metric = ExactMatch() if scenario_spec.metric_name == "exact_match" else None
+    scenario = scenario_class(metric=metric)
+    return scenario
+
+
+def load_client(model_name: str, enable_cache: bool) -> BaseLLMClient:
+    model_config = MODEL_CONFIGS[model_name]
+    client_spec = model_config.client_spec
+
+    client_class = dynamic_import(client_spec.class_name)
+
+    client = client_class(
+        **client_spec.args,
+        enable_cache=enable_cache,
+    )
+    client.model = model_name
+
+    return client
+
+
+async def run_single_evaluation(
+    scenario: BaseScenario,
+    client: BaseLLMClient,
+    num_samples: int,
+):
+    """
+    Run the evaluation for a given scenario and client.
+
+    :param scenario: The scenario instance. This handles the dataset and the metric.
+    :param client: The client instance. This handles making the LLM call.
+    :param enable_cache: Whether to enable caching.
     :param num_samples: Number of dataset samples to evaluate.
-    :return: A tuple (scenario, dataset).
-    """
-    if scenario_name == "math500":
-        scenario = Math500Scenario(metric=ExactMatch())
-    elif scenario_name == "mmlupro":
-        scenario = MMLUProScenario(metric=ExactMatch())
-    else:
-        raise ValueError(f"Unknown scenario: {scenario_name}")
-
-    dataset = scenario.get_dataset_rows()[:num_samples]
-    return scenario, dataset
-
-
-async def run_evaluation(scenario, dataset, enable_cache: bool):
-    """
-    Runs the evaluation for a given scenario and dataset.
-    
-    :param scenario: The scenario instance.
-    :param dataset: A subset of dataset rows.
     :return: The obtained results from the evaluation.
     """
+    # Initialize the evaluation
     evaluation = weave.Evaluation(
-        dataset=dataset,
+        dataset=scenario.get_dataset_rows(num_samples),
         scorers=[scenario],
         preprocess_model_input=scenario.preprocess_input,
     )
-    # TODO: make this configurable
-    client = OpenAIClient(
-        model="gpt-4o-mini",
-        temperature=0.0,
-        max_completion_tokens=4096,
-        system_prompt=scenario.system_prompt.content,
-        enable_cache=enable_cache,
-    )
+    
+    # Configure the system prompt for the client
+    client.system_prompt = scenario.system_prompt.content
+    
+    # Run the evaluation
+    eval_name = f"{client.client_name}:{client.model}-{scenario.scenario_name}"
     results = await evaluation.evaluate(
-        client, __weave={"display_name": client.client_name + ":" + client.model}
+        client, __weave={"display_name": eval_name}
     )
     return results, evaluation
 
@@ -81,7 +112,15 @@ def evaluate(
     scenario: Annotated[
         ScenarioChoice, typer.Option(case_sensitive=False)
     ] = ScenarioChoice.all,
-    num_samples: int = 2,
+    model_name: str = typer.Option(
+        "gpt-4o",
+        help="The name of the model to use for evaluation.",
+        case_sensitive=True,
+        show_default=True,
+        prompt="Please choose a model",
+        autocompletion=lambda incomplete: [name for name in MODEL_CONFIGS.keys() if name.startswith(incomplete)]
+    ),
+    num_samples: int = None,
     enable_cache: bool = True,
 ):
     """
@@ -93,53 +132,23 @@ def evaluate(
     # Initialize the weave client
     weave.init("nextbench-dev")
 
-    # Determine which scenarios to run
-    if scenario == ScenarioChoice.all:
-        # TODO: make this better 
-        scenario_names = [ScenarioChoice.math500.value, ScenarioChoice.mmlupro.value]
-    else:
-        scenario_names = [scenario.value]
-
-    async def run_all():
-        leaderboard_columns = []
-        for scenario_name in scenario_names:
-            typer.echo(
-                typer.style(
-                    f"Running evaluation for '{scenario_name}' scenario...", fg=typer.colors.GREEN, bold=True
-                )
+    async def run():
+        typer.echo(
+            typer.style(
+                f"Evaluating model: {model_name} on {scenario}", fg=typer.colors.GREEN, bold=True
             )
-            scenario_instance, dataset = get_scenario_and_dataset(scenario_name, num_samples)
-            result, evaluation = await run_evaluation(scenario_instance, dataset, enable_cache)
-
-            leaderboard_columns.append(
-                leaderboard.LeaderboardColumn(
-                    evaluation_object_ref=get_ref(evaluation).uri(),
-                    scorer_name=type(scenario_instance).__name__,
-                    summary_metric_path="true_fraction",
-                )
-            )
-
-        return leaderboard_columns
-
-    leaderboard_columns = asyncio.run(run_all())
-
-
-    spec = leaderboard.Leaderboard(
-        name="NextBench (LLM Benchmarks)",
-        description="""This leaderboard compares the performance of LLMs on a variety of hard benchmarks.
-
-        Add more details here.
-        """,
-        columns=leaderboard_columns,
-    )
-
-    ref = weave.publish(spec)
-
-    typer.echo(
-        typer.style(
-            f"Leaderboard published at {ref}", fg=typer.colors.GREEN, bold=True
         )
-    )
+
+        scenario_instance = load_scenario(scenario)
+        client = load_client(model_name, enable_cache)
+
+        result, evaluation = await run_single_evaluation(
+            scenario_instance,
+            client,
+            num_samples,
+        )
+
+    return asyncio.run(run())
 
 if __name__ == "__main__":
     app()

@@ -39,12 +39,14 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
         weave.publish(self.system_prompt, name=self.scenario_name)
 
     @cacher(DiskCacheBackend(".cache/datasets"))
-    def get_dataset_rows(self) -> list[dict]:
+    def get_dataset_rows(self, num_samples: int) -> list[dict]:
         """
         Returns the list of rows (dicts) from the chosen dataset. The dataset is provided as a weave Dataset ref.
         More info: https://weave-docs.wandb.ai/guides/core-types/datasets
         """
         raw_rows = weave.ref(self.dataset_ref).get().rows
+        if num_samples is not None:
+            raw_rows = raw_rows[:num_samples]
         return [to_plain_object(row) for row in raw_rows]
 
     @abc.abstractmethod
@@ -72,7 +74,11 @@ class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
         Compares the ground truth 'answer' with the parsed output 
         (by default `postprocess_output`) to yield a boolean or numeric metric.
         """
-        prediction = self.postprocess_output(output)
+        try:
+            prediction = self.postprocess_output(output)
+        except Exception as e:
+            print(f"Error in postprocess_output: {e}")
+            return None
         return self.metric.score(answer, prediction)
 
 
