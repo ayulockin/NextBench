@@ -97,7 +97,7 @@ async def run_single_evaluation(
     )
 
     # Configure the system prompt for the client
-    client.system_prompt = scenario.system_prompt.content
+    client.system_prompt = scenario.system_prompt
 
     # Run the evaluation
     eval_name = f"{client.client_name}:{client.model}-{scenario.scenario_name}"

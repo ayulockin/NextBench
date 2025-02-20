@@ -1,8 +1,9 @@
 import abc
-from typing import Any
+from typing import Any, Optional
 
 import weave
 from weave.trace.vals import WeaveDict, WeaveList
+from weave.trace.context.weave_client_context import get_weave_client
 
 from nextbench.utils import DiskCacheBackend, RequestResult, cacher
 
@@ -29,17 +30,21 @@ def to_plain_object(obj):
 
 class BaseScenario(weave.Scorer, metaclass=abc.ABCMeta):
     dataset_ref: str
-    system_prompt: weave.StringPrompt
+    system_prompt: str
     metric: weave.Scorer
     scenario_name: str
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
-        self.system_prompt = weave.StringPrompt(self.system_prompt)
-        weave.publish(self.system_prompt, name=self.scenario_name)
+
+        if get_weave_client() is not None:
+            weave.publish(
+                weave.StringPrompt(self.system_prompt),
+                name=self.scenario_name,
+            )
 
     @cacher(DiskCacheBackend(".cache/datasets"))
-    def get_dataset_rows(self, num_samples: int) -> list[dict]:
+    def get_dataset_rows(self, num_samples: Optional[int] = None) -> list[dict]:
         """
         Returns the list of rows (dicts) from the chosen dataset. The dataset is provided as a weave Dataset ref.
         More info: https://weave-docs.wandb.ai/guides/core-types/datasets

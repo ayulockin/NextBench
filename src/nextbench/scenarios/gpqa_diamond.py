@@ -11,14 +11,14 @@ def parse_option_number(completion: str) -> str:
     return re.search(r"\\boxed{(.*)}", completion).group(1)
 
 
-class MMLUProScenario(BaseScenario):
+class GPQADiamondScenario(BaseScenario):
     dataset_ref: str = (
-        "weave:///ayut/NextBench/object/MMLU-Pro:latest"
+        "weave:///ayut/NextBench/object/GPQA-Diamond:latest"
     )
     system_prompt: str = (
         "Select the most appropriate answer from the given options and return the correct option number in the \\boxed{} format"
     )
-    scenario_name: str = "MMLU-Pro"
+    scenario_name: str = "GPQA-Diamond"
 
     def preprocess_input(self, row: dict) -> dict:
         assert "question" in row, "Question column is required"
@@ -50,14 +50,13 @@ if __name__ == "__main__":
             return answer == output
 
     # Instantiate the scenario.
-    scenario = MMLUProScenario(metric=DummyMetric())
+    scenario = GPQADiamondScenario(metric=DummyMetric())
+
+    # Download the dataset.
+    dataset = scenario.get_dataset_rows()
 
     # Create a sample input row.
-    test_row = {
-        "question": "What is the capital of France?",
-        "options": ["Berlin", "Madrid", "Paris", "Rome"],
-        "answer": "C",
-    }
+    test_row = dataset[0]
     input_data = scenario.preprocess_input(test_row)
 
     # Simulate a RequestResult with a correctly formatted boxed answer.

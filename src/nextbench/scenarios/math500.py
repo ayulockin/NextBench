@@ -13,7 +13,7 @@ def parse_math_answer(completion: str) -> str:
 
 class Math500Scenario(BaseScenario):
     dataset_ref: str = (
-        "weave:///ayut/NextBench/object/MATH500:YMovIwbHIlH2hxe70wriWldlxHwEfXnkfuDX4nvdbzw"
+        "weave:///ayut/NextBench/object/MATH500:latest"
     )
     system_prompt: str = (
         "Answer the question and return the answer in the \\boxed{} format."
