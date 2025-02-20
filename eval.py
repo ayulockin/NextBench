@@ -13,9 +13,12 @@ from weave.flow import leaderboard
 from weave.trace.weave_client import get_ref
 
 from nextbench.clients import BaseLLMClient
-from nextbench.configs.config_registry import (MODEL_CONFIGS, SCENARIO_CONFIGS,
-                                               register_model_configs,
-                                               register_scenario_configs)
+from nextbench.configs.config_registry import (
+    MODEL_CONFIGS,
+    SCENARIO_CONFIGS,
+    register_model_configs,
+    register_scenario_configs,
+)
 from nextbench.scenarios import BaseScenario
 
 register_scenario_configs()

@@ -12,9 +12,7 @@ def parse_option_number(completion: str) -> str:
 
 
 class GPQADiamondScenario(BaseScenario):
-    dataset_ref: str = (
-        "weave:///ayut/NextBench/object/GPQA-Diamond:latest"
-    )
+    dataset_ref: str = "weave:///ayut/NextBench/object/GPQA-Diamond:latest"
     system_prompt: str = (
         "Select the most appropriate answer from the given options and return the correct option number in the \\boxed{} format"
     )
